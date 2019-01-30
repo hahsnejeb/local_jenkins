@@ -38,12 +38,6 @@ pipeline{
 
             steps {
                 echo "bejen - test"
-                #build job: 'scenario-collection', parameters: [
-                #string(name: 'SCENARIO', value: "test-env-root"),
-                #string(name: 'ACTION', value: terraformaction),
-                #booleanParam(name: 'APPLY_ANSIBLE', value: false),
-                #string(name: 'TESTENV', value: environment)
-                #]
             }
         }
 
