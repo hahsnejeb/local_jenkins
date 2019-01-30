@@ -38,6 +38,9 @@ pipeline{
 
             steps {
                 echo "bejen - test"
+	        echo "${terraformaction}"
+	        echo "${environment}"
+                echo "bejen - test"
             }
         }
 
