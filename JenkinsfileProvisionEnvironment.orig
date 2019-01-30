@@ -1,0 +1,135 @@
+#!groovy
+pipeline{
+    agent {
+	    label 'docker'
+    }
+    options { 
+        buildDiscarder(logRotator(numToKeepStr: '30'))
+    }
+
+    parameters {
+        choice(  name: 'terraformaction'
+	       , choices : 'plan\napply\ndestroy\n'
+           , description: 'Select Terraform Action'
+	    )      
+        choice(  name: 'environment'
+	       , choices : 'test\naat1\naat2\naat3\naat4\naat5\naat6\naat7\naat8\naat9\naat10\nsit1\nsit2\nuat1\nuat2\ncand1\ncand2\n'
+           , description: 'Select Environment to provision the server in'
+	    )
+    }
+
+    environment {
+        PROJECT_NAME = 'infranewprovisioneresources'
+    }
+    stages{
+        stage('PreReqs'){
+            steps{
+                script {
+                    currentBuild.displayName = "${env.BUILD_ID}.terraform.${terraformaction}.${environment}"
+                    currentBuild.description = "Terraform ${terraformaction} ${environment}"
+                }
+            }
+        }
+        stage ('Build application-storage') {
+            when {
+                allOf {
+                    expression { env.environment !=~ /(uat*|cand*)/ }
+                    expression { env.terraformaction != "destroy" }
+                }
+            }
+
+            steps {
+                build job: 'scenario-collection', parameters: [
+                string(name: 'SCENARIO', value: "test-env-root"),
+                string(name: 'ACTION', value: terraformaction),
+                booleanParam(name: 'APPLY_ANSIBLE', value: false),
+                string(name: 'TESTENV', value: environment)
+                ]
+                build job: 'scenario-collection', parameters: [
+                string(name: 'SCENARIO', value: "test-env-storage"),
+                string(name: 'ACTION', value: terraformaction),
+                booleanParam(name: 'APPLY_ANSIBLE', value: true),
+                string(name: 'TESTENV', value: environment)
+                ]
+            }
+        }
+
+        stage ('Build application-stack') {
+            steps {
+                build job: 'scenario-collection', parameters: [
+                string(name: 'SCENARIO', value: "test-env-stack"),
+                string(name: 'ACTION', value: terraformaction),
+                booleanParam(name: 'APPLY_ANSIBLE', value: true),
+                string(name: 'TESTENV', value: environment)
+                ]
+                build job: 'scenario-collection', parameters: [
+                string(name: 'SCENARIO', value: "test-env-stack-search"),
+                string(name: 'ACTION', value: terraformaction),
+                booleanParam(name: 'APPLY_ANSIBLE', value: true),
+                string(name: 'TESTENV', value: environment)
+                ]
+                build job: 'scenario-collection', parameters: [
+                string(name: 'SCENARIO', value: "test-env-stack-mock"),
+                string(name: 'ACTION', value: terraformaction),
+                booleanParam(name: 'APPLY_ANSIBLE', value: true),
+                string(name: 'TESTENV', value: environment)
+                ]
+            }
+        }
+        
+        stage('Build New Resources') {
+            when {
+                allOf {
+                    expression { env.terraformaction != "destroy" }
+                }
+            }
+            parallel {
+                stage ('Build vm-web-www') {
+                    steps {
+                        build job: 'pipeline-provision-resource', parameters: [
+                        string(name: 'terraformaction', value: terraformaction),
+                        string(name: 'servertype', value: "vm-web-www"),
+                        string(name: 'environment', value: environment)
+                        ]
+                    }
+                }
+                stage ('Build vm-web-cc') {
+                    steps {
+                        build job: 'pipeline-provision-resource', parameters: [
+                        string(name: 'terraformaction', value: terraformaction),
+                        string(name: 'servertype', value: "vm-web-cc"),
+                        string(name: 'environment', value: environment)
+                        ]
+                    }
+                }
+                stage ('Build vm-web-ws') {
+                    steps {
+                        build job: 'pipeline-provision-resource', parameters: [
+                        string(name: 'terraformaction', value: terraformaction),
+                        string(name: 'servertype', value: "vm-web-ws"),
+                        string(name: 'environment', value: environment)
+                        ]
+                    }
+                }
+                stage ('Build vm-web-api') {
+                    steps {
+                        build job: 'pipeline-provision-resource', parameters: [
+                        string(name: 'terraformaction', value: terraformaction),
+                        string(name: 'servertype', value: "vm-web-api"),
+                        string(name: 'environment', value: environment)
+                        ]
+                    }
+                }
+                stage ('Build vm-web-instore') {
+                    steps {
+                        build job: 'pipeline-provision-resource', parameters: [
+                        string(name: 'terraformaction', value: terraformaction),
+                        string(name: 'servertype', value: "vm-web-instore"),
+                        string(name: 'environment', value: environment)
+                        ]
+                    }
+                }
+            }
+        }
+    }
+}

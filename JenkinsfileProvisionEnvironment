@@ -1,0 +1,51 @@
+#!groovy
+pipeline{
+    agent
+    options { 
+        buildDiscarder(logRotator(numToKeepStr: '30'))
+    }
+
+    parameters {
+        choice(  name: 'terraformaction'
+	       , choices : 'plan\napply\ndestroy\n'
+           , description: 'Select Terraform Action'
+	    )      
+        choice(  name: 'environment'
+	       , choices : 'test\naat1\naat2\naat3\naat4\naat5\naat6\naat7\naat8\naat9\naat10\nsit1\nsit2\nuat1\nuat2\ncand1\ncand2\n'
+           , description: 'Select Environment to provision the server in'
+	    )
+    }
+
+    environment {
+        PROJECT_NAME = 'infranewprovisioneresources'
+    }
+    stages{
+        stage('PreReqs'){
+            steps{
+                script {
+                    currentBuild.displayName = "LOCAL_${env.BUILD_ID}.terraform.${terraformaction}.${environment}"
+                    currentBuild.description = "LOCAL_Terraform ${terraformaction} ${environment}"
+                }
+            }
+        }
+        stage ('Build application-storage') {
+            when {
+                allOf {
+                    expression { env.environment !=~ /(uat*|cand*)/ }
+                    expression { env.terraformaction != "destroy" }
+                }
+            }
+
+            steps {
+                echo "bejen - test"
+                #build job: 'scenario-collection', parameters: [
+                #string(name: 'SCENARIO', value: "test-env-root"),
+                #string(name: 'ACTION', value: terraformaction),
+                #booleanParam(name: 'APPLY_ANSIBLE', value: false),
+                #string(name: 'TESTENV', value: environment)
+                #]
+            }
+        }
+
+    }
+}
