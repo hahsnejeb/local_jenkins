@@ -46,7 +46,7 @@ pipeline{
                     }
                     steps {
                         catchError{
-                        build job: 'pipeline-provision-environment', parameters: [
+                        build job: 'JenkinsfileProvisionEnvironment', parameters: [
                         string(name: 'terraformaction', value: terraformaction),
                         string(name: 'environment', value: "aat1")
                         ]}
@@ -58,7 +58,7 @@ pipeline{
                     }
                     steps {
                         catchError{
-                        build job: 'pipeline-provision-environment', parameters: [
+                        build job: 'JenkinsfileProvisionEnvironment', parameters: [
                         string(name: 'terraformaction', value: terraformaction),
                         string(name: 'environment', value: "aat2")
                         ]}
