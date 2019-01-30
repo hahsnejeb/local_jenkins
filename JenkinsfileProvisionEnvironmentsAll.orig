@@ -1,0 +1,336 @@
+#!groovy
+pipeline{
+    agent {
+	    label 'docker'
+    }
+    triggers {
+        cron('H/30 2-5 * * 1-5')
+    }
+    options {
+        disableConcurrentBuilds()
+        buildDiscarder(logRotator(numToKeepStr: '10'))
+    }
+
+
+    parameters {
+        choice(  name: 'terraformaction'
+	       , choices : 'apply\nplan\ndestroy\n'
+           , description: 'Select Terraform Action'
+	    )
+        booleanParam(  name: 'AAT1_PROV'
+		     , defaultValue: true
+		     , description: 'Should this env be provisioned?'
+		)
+        booleanParam(  name: 'AAT2_PROV'
+		     , defaultValue: true
+		     , description: 'Should this env be provisioned?'
+		)
+        booleanParam(  name: 'AAT3_PROV'
+		     , defaultValue: true
+		     , description: 'Should this env be provisioned?'
+		)
+        booleanParam(  name: 'AAT4_PROV'
+		     , defaultValue: true
+		     , description: 'Should this env be provisioned?'
+		)
+        booleanParam(  name: 'AAT5_PROV'
+		     , defaultValue: true
+		     , description: 'Should this env be provisioned?'
+		)
+        booleanParam(  name: 'AAT6_PROV'
+		     , defaultValue: true
+		     , description: 'Should this env be provisioned?'
+		)
+        booleanParam(  name: 'AAT7_PROV'
+		     , defaultValue: true
+		     , description: 'Should this env be provisioned?'
+		)
+        booleanParam(  name: 'SIT1_PROV'
+		     , defaultValue: true
+		     , description: 'Should this env be provisioned?'
+		)
+        booleanParam(  name: 'SIT2_PROV'
+		     , defaultValue: false
+		     , description: 'Should this env be provisioned?'
+		)
+        booleanParam(  name: 'UAT1_PROV'
+		     , defaultValue: true
+		     , description: 'Should this env be provisioned?'
+		)
+        booleanParam(  name: 'UAT2_PROV'
+		     , defaultValue: false
+		     , description: 'Should this env be provisioned?'
+		)
+        booleanParam(  name: 'CAND1_PROV'
+		     , defaultValue: false
+		     , description: 'Should this env be provisioned?'
+		)
+        booleanParam(  name: 'CAND2_PROV'
+		     , defaultValue: false
+		     , description: 'Should this env be provisioned?'
+		)
+        booleanParam(  name: 'S3_CONTENT_DEVELOP'
+		     , defaultValue: true
+		     , description: 'Should this env be provisioned?'
+		)
+        booleanParam(  name: 'S3_CONTENT_DEVELOP2'
+         , defaultValue: true
+         , description: 'Should this env be provisioned?'
+    )
+        booleanParam(  name: 'S3_CONTENT_PREPROD'
+		     , defaultValue: true
+		     , description: 'Should this env be provisioned?'
+		)
+        booleanParam(  name: 'S3_CONTENT_PROD'
+		     , defaultValue: true
+		     , description: 'Should this env be provisioned?'
+		)
+    }
+
+    environment {
+        PROJECT_NAME = 'infranewprovisioneenvironments'
+    }
+    stages{
+        stage('PreReqs'){
+            steps{
+                script {
+                    currentBuild.displayName = "${env.BUILD_ID}.terraform.${terraformaction}.environments"
+                    currentBuild.description = "Terraform ${terraformaction} environments"
+                }
+            }
+        }
+        stage('Build AAT Environments') {
+            parallel {
+                stage ('Build aat1') {
+                    when {
+                        expression { params.AAT1_PROV == true}
+                    }
+                    steps {
+                        catchError{
+                        build job: 'pipeline-provision-environment', parameters: [
+                        string(name: 'terraformaction', value: terraformaction),
+                        string(name: 'environment', value: "aat1")
+                        ]}
+                    }
+                }
+                stage ('Build aat2') {
+                    when {
+                        expression { params.AAT2_PROV == true}
+                    }
+                    steps {
+                        catchError{
+                        build job: 'pipeline-provision-environment', parameters: [
+                        string(name: 'terraformaction', value: terraformaction),
+                        string(name: 'environment', value: "aat2")
+                        ]}
+                    }
+                }
+                stage ('Build aat3') {
+                    when {
+                        expression { params.AAT3_PROV == true}
+                    }
+                    steps {
+                        catchError{
+                        build job: 'pipeline-provision-environment', parameters: [
+                        string(name: 'terraformaction', value: terraformaction),
+                        string(name: 'environment', value: "aat3")
+                        ]}
+                    }
+                }
+                stage ('Build aat4') {
+                    when {
+                        expression { params.AAT4_PROV == true}
+                    }
+                    steps {
+                        catchError{
+                        build job: 'pipeline-provision-environment', parameters: [
+                        string(name: 'terraformaction', value: terraformaction),
+                        string(name: 'environment', value: "aat4")
+                        ]}
+                    }
+                }
+                stage ('Build aat5') {
+                    when {
+                        expression { params.AAT5_PROV == true}
+                    }
+                    steps {
+                        catchError{
+                        build job: 'pipeline-provision-environment', parameters: [
+                        string(name: 'terraformaction', value: terraformaction),
+                        string(name: 'environment', value: "aat5")
+                        ]}
+                    }
+                }
+                stage ('Build aat6') {
+                    when {
+                        expression { params.AAT6_PROV == true}
+                    }
+                    steps {
+                        catchError{
+                        build job: 'pipeline-provision-environment', parameters: [
+                        string(name: 'terraformaction', value: terraformaction),
+                        string(name: 'environment', value: "aat6")
+                        ]}
+                    }
+                }
+                stage ('Build aat7') {
+                    when {
+                        expression { params.AAT7_PROV == true}
+                    }
+                    steps {
+                        catchError{
+                        build job: 'pipeline-provision-environment', parameters: [
+                        string(name: 'terraformaction', value: terraformaction),
+                        string(name: 'environment', value: "aat7")
+                        ]}
+                    }
+                }
+            }
+        }
+        stage('Build SIT Environments') {
+            parallel {
+                stage ('Build sit1') {
+                    when {
+                        expression { params.SIT1_PROV == true}
+                    }
+                    steps {
+                        catchError{
+                        build job: 'pipeline-provision-environment', parameters: [
+                        string(name: 'terraformaction', value: terraformaction),
+                        string(name: 'environment', value: "sit1")
+                        ]}
+                    }
+                }
+                stage ('Build sit2') {
+                    when {
+                        expression { params.SIT2_PROV == true}
+                    }
+                    steps {
+                        build job: 'pipeline-provision-environment', parameters: [
+                        string(name: 'terraformaction', value: terraformaction),
+                        string(name: 'environment', value: "sit2")
+                        ]
+                    }
+                }
+            }
+        }
+        stage('Build UAT Environments') {
+            parallel {
+                stage ('Build uat1') {
+                    when {
+                        expression { params.UAT1_PROV == true}
+                    }
+                    steps {
+                        catchError{
+                        build job: 'pipeline-provision-environment', parameters: [
+                        string(name: 'terraformaction', value: terraformaction),
+                        string(name: 'environment', value: "uat1")
+                        ]}
+                    }
+                }
+                stage ('Build uat2') {
+                    when {
+                        expression { params.UAT2_PROV == true}
+                    }
+                    steps {
+                        catchError{
+                        build job: 'pipeline-provision-environment', parameters: [
+                        string(name: 'terraformaction', value: terraformaction),
+                        string(name: 'environment', value: "uat2")
+                        ]}
+                    }
+                }
+            }
+        }
+        stage('Build CAND Environments') {
+            parallel {
+                stage ('Build cand1') {
+                    when {
+                        expression { params.CAND1_PROV == true}
+                    }
+                    steps {
+                        catchError{
+                        build job: 'pipeline-provision-environment', parameters: [
+                        string(name: 'terraformaction', value: terraformaction),
+                        string(name: 'environment', value: "cand1")
+                        ]}
+                    }
+                }
+                stage ('Build cand2') {
+                    when {
+                        expression { params.CAND2_PROV == true}
+                    }
+                    steps {
+                        catchError{
+                        build job: 'pipeline-provision-environment', parameters: [
+                        string(name: 'terraformaction', value: terraformaction),
+                        string(name: 'environment', value: "cand2")
+                        ]}
+                    }
+                }
+            }
+        }
+        stage('Build S3 Content HTML') {
+            when {
+                allOf {
+                    expression { env.terraformaction != "destroy" }
+                }
+            }
+
+            parallel {
+                stage ('Build develop') {
+                    when {
+                        expression { params.S3_CONTENT_DEVELOP == true}
+                    }
+                    steps {
+                        catchError{
+                        build job: 'pipeline-provision-resource-data', parameters: [
+                        string(name: 'terraformaction', value: terraformaction),
+                        string(name: 'resourcetype', value: "s3-content-html"),
+                        string(name: 'environment', value: "develop")
+                        ]}
+                    }
+                }
+                stage ('Build develop2') {
+                    when {
+                        expression { params.S3_CONTENT_DEVELOP2 == true}
+                    }
+                    steps {
+                        catchError{
+                        build job: 'pipeline-provision-resource-data', parameters: [
+                        string(name: 'terraformaction', value: terraformaction),
+                        string(name: 'resourcetype', value: "s3-content-html"),
+                        string(name: 'environment', value: "develop2")
+                        ]}
+                    }
+                }
+                stage ('Build preprod') {
+                    when {
+                        expression { params.S3_CONTENT_PREPROD == true}
+                    }
+                    steps {
+                        catchError{
+                        build job: 'pipeline-provision-resource-data', parameters: [
+                        string(name: 'terraformaction', value: terraformaction),
+                        string(name: 'resourcetype', value: "s3-content-html"),
+                        string(name: 'environment', value: "preprod")
+                        ]}
+                    }
+                }
+                stage ('Build prod') {
+                    when {
+                        expression { params.S3_CONTENT_PROD == true}
+                    }
+                    steps {
+                        catchError{
+                        build job: 'pipeline-provision-resource-data', parameters: [
+                        string(name: 'terraformaction', value: terraformaction),
+                        string(name: 'resourcetype', value: "s3-content-html"),
+                        string(name: 'environment', value: "prod")
+                        ]}
+                    }
+                }
+            }
+        }
+    }
+}
